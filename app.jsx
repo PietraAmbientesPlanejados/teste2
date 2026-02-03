@@ -1987,21 +1987,19 @@ const SistemaOrcamentoMarmore = () => {
         {tela === 'orcamento' && orcamentoAtual && (
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex-1 mr-4">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={orcamentoAtual.nome}
-                      onChange={(e) => setOrcamentoAtual({ ...orcamentoAtual, nome: e.target.value })}
-                      className="text-2xl font-semibold text-gray-800 border-b-2 border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none flex-1"
-                      placeholder="Nome do orçamento"
-                    />
-                    <Edit2 size={20} className="text-gray-400" title="Clique no nome para editar" />
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">Criado em: {orcamentoAtual.data}</p>
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <input
+                    type="text"
+                    value={orcamentoAtual.nome}
+                    onChange={(e) => setOrcamentoAtual({ ...orcamentoAtual, nome: e.target.value })}
+                    className="text-2xl font-semibold text-gray-800 border-b-2 border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none flex-1 min-w-0"
+                    placeholder="Nome do orçamento"
+                  />
+                  <Edit2 size={20} className="text-gray-400 flex-shrink-0" title="Clique no nome para editar" />
                 </div>
-                <div className="flex flex-wrap gap-2 justify-end sm:justify-start">
+                <p className="text-sm text-gray-500 mb-3">Criado em: {orcamentoAtual.data}</p>
+                <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => setTela('plano-corte')}
                     className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
