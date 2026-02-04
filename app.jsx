@@ -189,7 +189,7 @@ const SistemaOrcamentoMarmore = () => {
       pdf.text('Chapa ' + (idx + 1) + ' / ' + orcamentoAtual.chapas.length, pageW - margin - 45, 10);
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(chapa.material.nome, pageW - margin - 45, 17);
+      pdf.text(chapa.material?.nome || 'Material', pageW - margin - 45, 17);
 
       // ---------- ÁREA DE DESENHO ----------
       const areaTop = headerH + 8;
@@ -200,8 +200,8 @@ const SistemaOrcamentoMarmore = () => {
       const areaH = areaBottom - areaTop;
 
       // Calcular escala para caber a chapa na área
-      const chapaW = chapa.material.comprimento;
-      const chapaH = chapa.material.altura;
+      const chapaW = chapa.material?.comprimento || 3000;
+      const chapaH = chapa.material?.altura || 2000;
       const escalaX = areaW / chapaW;
       const escalaY = areaH / chapaH;
       const escala = Math.min(escalaX, escalaY) * 0.95;
@@ -2658,13 +2658,6 @@ const AmbienteCard = ({ ambiente, materiais, onAdicionarPeca, onExcluirPeca, onV
                 </label>
               </div>
               
-              {/* Preview Sempre Visível */}
-              {novaPeca.comprimento && novaPeca.altura && (
-                <div className="mb-3 max-w-xs">
-                  <PreviewAcabamentos peca={novaPeca} />
-                </div>
-              )}
-              
               {/* Preview Unificado de Acabamentos */}
               {(novaPeca.acabamentos.esquadria.ativo || 
                 novaPeca.acabamentos.boleado.ativo || 
@@ -2673,425 +2666,101 @@ const AmbienteCard = ({ ambiente, materiais, onAdicionarPeca, onExcluirPeca, onV
                 <div className="mb-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <h6 className="font-semibold text-sm mb-2">📐 Selecione os lados para cada acabamento:</h6>
                   
-                  {/* Controles por tipo de acabamento */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {novaPeca.acabamentos.esquadria.ativo && (
-                      <div className="bg-white rounded p-2 border border-red-200">
-                        <p className="text-xs font-semibold text-red-600 mb-1">🔴 Esquadria - Selecione os lados:</p>
-                        <div className="grid grid-cols-4 gap-2">
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  esquadria: {
-                                    ...novaPeca.acabamentos.esquadria,
-                                    lados: {
-                                      ...novaPeca.acabamentos.esquadria.lados,
-                                      superior: !novaPeca.acabamentos.esquadria.lados.superior
-                                    }
-                                  }
+                      <div>
+                        <p className="text-xs font-semibold text-red-600 mb-2">🔴 Esquadria</p>
+                        <SeletorLadosAcabamento
+                          peca={novaPeca}
+                          tipoAcabamento="esquadria"
+                          cor="#ef4444"
+                          onChange={(novosLados) => {
+                            setNovaPeca({
+                              ...novaPeca,
+                              acabamentos: {
+                                ...novaPeca.acabamentos,
+                                esquadria: {
+                                  ...novaPeca.acabamentos.esquadria,
+                                  lados: novosLados
                                 }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.esquadria.lados.superior 
-                                ? 'bg-red-600 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Superior
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  esquadria: {
-                                    ...novaPeca.acabamentos.esquadria,
-                                    lados: {
-                                      ...novaPeca.acabamentos.esquadria.lados,
-                                      inferior: !novaPeca.acabamentos.esquadria.lados.inferior
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.esquadria.lados.inferior 
-                                ? 'bg-red-600 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Inferior
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  esquadria: {
-                                    ...novaPeca.acabamentos.esquadria,
-                                    lados: {
-                                      ...novaPeca.acabamentos.esquadria.lados,
-                                      esquerda: !novaPeca.acabamentos.esquadria.lados.esquerda
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.esquadria.lados.esquerda 
-                                ? 'bg-red-600 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Esquerda
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  esquadria: {
-                                    ...novaPeca.acabamentos.esquadria,
-                                    lados: {
-                                      ...novaPeca.acabamentos.esquadria.lados,
-                                      direita: !novaPeca.acabamentos.esquadria.lados.direita
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.esquadria.lados.direita 
-                                ? 'bg-red-600 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Direita
-                          </button>
-                        </div>
+                              }
+                            });
+                          }}
+                        />
                       </div>
                     )}
-                    
+
                     {novaPeca.acabamentos.boleado.ativo && (
-                      <div className="bg-white rounded p-2 border border-yellow-200">
-                        <p className="text-xs font-semibold text-yellow-600 mb-1">🟡 Boleado - Selecione os lados:</p>
-                        <div className="grid grid-cols-4 gap-2">
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  boleado: {
-                                    ...novaPeca.acabamentos.boleado,
-                                    lados: {
-                                      ...novaPeca.acabamentos.boleado.lados,
-                                      superior: !novaPeca.acabamentos.boleado.lados.superior
-                                    }
-                                  }
+                      <div>
+                        <p className="text-xs font-semibold text-yellow-600 mb-2">🟡 Boleado</p>
+                        <SeletorLadosAcabamento
+                          peca={novaPeca}
+                          tipoAcabamento="boleado"
+                          cor="#eab308"
+                          onChange={(novosLados) => {
+                            setNovaPeca({
+                              ...novaPeca,
+                              acabamentos: {
+                                ...novaPeca.acabamentos,
+                                boleado: {
+                                  ...novaPeca.acabamentos.boleado,
+                                  lados: novosLados
                                 }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.boleado.lados.superior 
-                                ? 'bg-yellow-500 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Superior
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  boleado: {
-                                    ...novaPeca.acabamentos.boleado,
-                                    lados: {
-                                      ...novaPeca.acabamentos.boleado.lados,
-                                      inferior: !novaPeca.acabamentos.boleado.lados.inferior
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.boleado.lados.inferior 
-                                ? 'bg-yellow-500 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Inferior
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  boleado: {
-                                    ...novaPeca.acabamentos.boleado,
-                                    lados: {
-                                      ...novaPeca.acabamentos.boleado.lados,
-                                      esquerda: !novaPeca.acabamentos.boleado.lados.esquerda
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.boleado.lados.esquerda 
-                                ? 'bg-yellow-500 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Esquerda
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  boleado: {
-                                    ...novaPeca.acabamentos.boleado,
-                                    lados: {
-                                      ...novaPeca.acabamentos.boleado.lados,
-                                      direita: !novaPeca.acabamentos.boleado.lados.direita
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.boleado.lados.direita 
-                                ? 'bg-yellow-500 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Direita
-                          </button>
-                        </div>
+                              }
+                            });
+                          }}
+                        />
                       </div>
                     )}
-                    
+
                     {novaPeca.acabamentos.polimento.ativo && (
-                      <div className="bg-white rounded p-2 border border-blue-200">
-                        <p className="text-xs font-semibold text-blue-600 mb-1">🔵 Polimento - Selecione os lados:</p>
-                        <div className="grid grid-cols-4 gap-2">
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  polimento: {
-                                    ...novaPeca.acabamentos.polimento,
-                                    lados: {
-                                      ...novaPeca.acabamentos.polimento.lados,
-                                      superior: !novaPeca.acabamentos.polimento.lados.superior
-                                    }
-                                  }
+                      <div>
+                        <p className="text-xs font-semibold text-blue-600 mb-2">🔵 Polimento</p>
+                        <SeletorLadosAcabamento
+                          peca={novaPeca}
+                          tipoAcabamento="polimento"
+                          cor="#3b82f6"
+                          onChange={(novosLados) => {
+                            setNovaPeca({
+                              ...novaPeca,
+                              acabamentos: {
+                                ...novaPeca.acabamentos,
+                                polimento: {
+                                  ...novaPeca.acabamentos.polimento,
+                                  lados: novosLados
                                 }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.polimento.lados.superior 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Superior
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  polimento: {
-                                    ...novaPeca.acabamentos.polimento,
-                                    lados: {
-                                      ...novaPeca.acabamentos.polimento.lados,
-                                      inferior: !novaPeca.acabamentos.polimento.lados.inferior
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.polimento.lados.inferior 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Inferior
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  polimento: {
-                                    ...novaPeca.acabamentos.polimento,
-                                    lados: {
-                                      ...novaPeca.acabamentos.polimento.lados,
-                                      esquerda: !novaPeca.acabamentos.polimento.lados.esquerda
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.polimento.lados.esquerda 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Esquerda
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  polimento: {
-                                    ...novaPeca.acabamentos.polimento,
-                                    lados: {
-                                      ...novaPeca.acabamentos.polimento.lados,
-                                      direita: !novaPeca.acabamentos.polimento.lados.direita
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.polimento.lados.direita 
-                                ? 'bg-blue-600 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Direita
-                          </button>
-                        </div>
+                              }
+                            });
+                          }}
+                        />
                       </div>
                     )}
-                    
+
                     {novaPeca.acabamentos.canal.ativo && (
-                      <div className="bg-white rounded p-2 border border-orange-200">
-                        <p className="text-xs font-semibold text-orange-600 mb-1">🟠 Canal - Selecione os lados:</p>
-                        <div className="grid grid-cols-4 gap-2">
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  canal: {
-                                    ...novaPeca.acabamentos.canal,
-                                    lados: {
-                                      ...novaPeca.acabamentos.canal.lados,
-                                      superior: !novaPeca.acabamentos.canal.lados.superior
-                                    }
-                                  }
+                      <div>
+                        <p className="text-xs font-semibold text-orange-600 mb-2">🟠 Canal</p>
+                        <SeletorLadosAcabamento
+                          peca={novaPeca}
+                          tipoAcabamento="canal"
+                          cor="#f59e0b"
+                          onChange={(novosLados) => {
+                            setNovaPeca({
+                              ...novaPeca,
+                              acabamentos: {
+                                ...novaPeca.acabamentos,
+                                canal: {
+                                  ...novaPeca.acabamentos.canal,
+                                  lados: novosLados
                                 }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.canal.lados.superior 
-                                ? 'bg-orange-500 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Superior
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  canal: {
-                                    ...novaPeca.acabamentos.canal,
-                                    lados: {
-                                      ...novaPeca.acabamentos.canal.lados,
-                                      inferior: !novaPeca.acabamentos.canal.lados.inferior
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.canal.lados.inferior 
-                                ? 'bg-orange-500 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Inferior
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  canal: {
-                                    ...novaPeca.acabamentos.canal,
-                                    lados: {
-                                      ...novaPeca.acabamentos.canal.lados,
-                                      esquerda: !novaPeca.acabamentos.canal.lados.esquerda
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.canal.lados.esquerda 
-                                ? 'bg-orange-500 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Esquerda
-                          </button>
-                          <button
-                            onClick={() => {
-                              setNovaPeca({
-                                ...novaPeca,
-                                acabamentos: {
-                                  ...novaPeca.acabamentos,
-                                  canal: {
-                                    ...novaPeca.acabamentos.canal,
-                                    lados: {
-                                      ...novaPeca.acabamentos.canal.lados,
-                                      direita: !novaPeca.acabamentos.canal.lados.direita
-                                    }
-                                  }
-                                }
-                              });
-                            }}
-                            className={`text-xs py-1 px-2 rounded ${
-                              novaPeca.acabamentos.canal.lados.direita 
-                                ? 'bg-orange-500 text-white' 
-                                : 'bg-gray-200 text-gray-700'
-                            }`}
-                          >
-                            Direita
-                          </button>
-                        </div>
+                              }
+                            });
+                          }}
+                        />
                       </div>
                     )}
                   </div>
                 </div>
+              )}</div>
               )}
 
               <h5 className="font-medium text-sm mb-2">Recortes (opcional)</h5>
@@ -3148,6 +2817,14 @@ const AmbienteCard = ({ ambiente, materiais, onAdicionarPeca, onExcluirPeca, onV
                 </div>
               </div>
 
+              {/* Preview da Peça */}
+              {novaPeca.comprimento && novaPeca.altura && (
+                <div className="mb-4">
+                  <PreviewAcabamentos peca={novaPeca} />
+                </div>
+              )}
+</div>
+
               <div className="flex gap-2">
                 <button
                   onClick={() => {
@@ -3195,6 +2872,201 @@ const AmbienteCard = ({ ambiente, materiais, onAdicionarPeca, onExcluirPeca, onV
           )}
         </div>
       )}
+    </div>
+  );
+};
+
+
+// Componente de seleção de lados via mini-prévia clicável
+const SeletorLadosAcabamento = ({ peca, tipoAcabamento, cor, onChange }) => {
+  const canvasRef = useRef(null);
+  const [hoveredSide, setHoveredSide] = useState(null);
+
+  useEffect(() => {
+    desenhar();
+  }, [peca, hoveredSide]);
+
+  const desenhar = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !peca.comprimento || !peca.altura) return;
+
+    const ctx = canvas.getContext('2d');
+    const largura = parseFloat(peca.comprimento) || 600;
+    const altura = parseFloat(peca.altura) || 400;
+
+    const canvasW = 140;
+    const canvasH = 110;
+    const margemTop = 20;
+    const margemLeft = 20;
+    const areaW = canvasW - margemLeft - 12;
+    const areaH = canvasH - margemTop - 12;
+
+    const escalaX = areaW / largura;
+    const escalaY = areaH / altura;
+    const escala = Math.min(escalaX, escalaY);
+
+    const w = largura * escala;
+    const h = altura * escala;
+    const offsetX = margemLeft + (areaW - w) / 2;
+    const offsetY = margemTop + (areaH - h) / 2;
+
+    canvas.width = canvasW;
+    canvas.height = canvasH;
+
+    // Fundo
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    // Peça
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(offsetX, offsetY, w, h);
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(offsetX, offsetY, w, h);
+
+    const lados = peca.acabamentos[tipoAcabamento]?.lados || {};
+    
+    // Converter hex para rgb
+    const hexToRgb = (hex) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return [r, g, b];
+    };
+    const [r, g, b] = hexToRgb(cor);
+
+    // Desenhar lados clicáveis com highlight
+    const espessura = 8;
+    
+    // Superior
+    const supAtivo = lados.superior;
+    const supHover = hoveredSide === 'superior';
+    ctx.fillStyle = supAtivo ? cor : (supHover ? `rgba(${r},${g},${b},0.3)` : 'rgba(200,200,200,0.5)');
+    ctx.fillRect(offsetX, offsetY - espessura, w, espessura);
+    
+    // Inferior
+    const infAtivo = lados.inferior;
+    const infHover = hoveredSide === 'inferior';
+    ctx.fillStyle = infAtivo ? cor : (infHover ? `rgba(${r},${g},${b},0.3)` : 'rgba(200,200,200,0.5)');
+    ctx.fillRect(offsetX, offsetY + h, w, espessura);
+    
+    // Esquerda
+    const esqAtivo = lados.esquerda;
+    const esqHover = hoveredSide === 'esquerda';
+    ctx.fillStyle = esqAtivo ? cor : (esqHover ? `rgba(${r},${g},${b},0.3)` : 'rgba(200,200,200,0.5)');
+    ctx.fillRect(offsetX - espessura, offsetY, espessura, h);
+    
+    // Direita
+    const dirAtivo = lados.direita;
+    const dirHover = hoveredSide === 'direita';
+    ctx.fillStyle = dirAtivo ? cor : (dirHover ? `rgba(${r},${g},${b},0.3)` : 'rgba(200,200,200,0.5)');
+    ctx.fillRect(offsetX + w, offsetY, espessura, h);
+
+    // Labels
+    ctx.fillStyle = '#64748b';
+    ctx.font = 'bold 9px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Superior', offsetX + w/2, offsetY - espessura - 2);
+    ctx.fillText('Inferior', offsetX + w/2, offsetY + h + espessura + 10);
+    
+    ctx.save();
+    ctx.translate(offsetX - espessura - 2, offsetY + h/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillText('Esquerda', 0, 0);
+    ctx.restore();
+    
+    ctx.save();
+    ctx.translate(offsetX + w + espessura + 2, offsetY + h/2);
+    ctx.rotate(Math.PI/2);
+    ctx.fillText('Direita', 0, 0);
+    ctx.restore();
+  };
+
+  const handleClick = (e) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const largura = parseFloat(peca.comprimento) || 600;
+    const altura = parseFloat(peca.altura) || 400;
+    const canvasW = 140;
+    const canvasH = 110;
+    const margemTop = 20;
+    const margemLeft = 20;
+    const areaW = canvasW - margemLeft - 12;
+    const areaH = canvasH - margemTop - 12;
+    const escalaX = areaW / largura;
+    const escalaY = areaH / altura;
+    const escala = Math.min(escalaX, escalaY);
+    const w = largura * escala;
+    const h = altura * escala;
+    const offsetX = margemLeft + (areaW - w) / 2;
+    const offsetY = margemTop + (areaH - h) / 2;
+    const espessura = 8;
+
+    const lados = peca.acabamentos[tipoAcabamento]?.lados || {};
+    let novoLado = null;
+
+    if (y >= offsetY - espessura && y < offsetY && x >= offsetX && x < offsetX + w) {
+      novoLado = 'superior';
+    } else if (y >= offsetY + h && y < offsetY + h + espessura && x >= offsetX && x < offsetX + w) {
+      novoLado = 'inferior';
+    } else if (x >= offsetX - espessura && x < offsetX && y >= offsetY && y < offsetY + h) {
+      novoLado = 'esquerda';
+    } else if (x >= offsetX + w && x < offsetX + w + espessura && y >= offsetY && y < offsetY + h) {
+      novoLado = 'direita';
+    }
+
+    if (novoLado) {
+      onChange({
+        ...lados,
+        [novoLado]: !lados[novoLado]
+      });
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const largura = parseFloat(peca.comprimento) || 600;
+    const altura = parseFloat(peca.altura) || 400;
+    const canvasW = 140;
+    const canvasH = 110;
+    const margemTop = 20;
+    const margemLeft = 20;
+    const areaW = canvasW - margemLeft - 12;
+    const areaH = canvasH - margemTop - 12;
+    const escalaX = areaW / largura;
+    const escalaY = areaH / altura;
+    const escala = Math.min(escalaX, escalaY);
+    const w = largura * escala;
+    const h = altura * escala;
+    const offsetX = margemLeft + (areaW - w) / 2;
+    const offsetY = margemTop + (areaH - h) / 2;
+    const espessura = 8;
+
+    let hover = null;
+    if (y >= offsetY - espessura && y < offsetY && x >= offsetX && x < offsetX + w) hover = 'superior';
+    else if (y >= offsetY + h && y < offsetY + h + espessura && x >= offsetX && x < offsetX + w) hover = 'inferior';
+    else if (x >= offsetX - espessura && x < offsetX && y >= offsetY && y < offsetY + h) hover = 'esquerda';
+    else if (x >= offsetX + w && x < offsetX + w + espessura && y >= offsetY && y < offsetY + h) hover = 'direita';
+
+    setHoveredSide(hover);
+  };
+
+  return (
+    <div className="flex justify-center">
+      <canvas
+        ref={canvasRef}
+        onClick={handleClick}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setHoveredSide(null)}
+        className="cursor-pointer border-2 border-gray-300 rounded"
+      />
     </div>
   );
 };
@@ -3360,60 +3232,19 @@ const PreviewAcabamentos = ({ peca, mostrarSempre = false, mini = false }) => {
       ctx.fillText(`${altura} mm`, 0, 3);
       ctx.restore();
       
-      // Legenda melhorada (apenas em modo normal)
-      if (peca.acabamentos && Object.values(peca.acabamentos).some(a => a.ativo)) {
-        let legendaX = 10;
-        let legendaY = 10;
-        
-        // Fundo da legenda
-        const numAcabamentos = Object.values(peca.acabamentos).filter(a => a.ativo).length;
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-        ctx.fillRect(8, 8, 110, numAcabamentos * 20 + 12);
-        ctx.strokeStyle = '#cbd5e1';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(8, 8, 110, numAcabamentos * 20 + 12);
-        
-        ctx.font = 'bold 9px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#64748b';
-        ctx.fillText('Acabamentos:', legendaX, legendaY + 8);
-        legendaY += 16;
-        
-        Object.keys(peca.acabamentos).forEach(tipoAcab => {
-          const acab = peca.acabamentos[tipoAcab];
-          if (acab.ativo) {
-            // Linha colorida
-            ctx.strokeStyle = coresAcabamentos[tipoAcab];
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 2]);
-            ctx.beginPath();
-            ctx.moveTo(legendaX, legendaY + 4);
-            ctx.lineTo(legendaX + 20, legendaY + 4);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // Nome
-            ctx.fillStyle = '#334155';
-            ctx.font = '10px Arial';
-            ctx.fillText(tipoAcab.charAt(0).toUpperCase() + tipoAcab.slice(1), legendaX + 25, legendaY + 7);
-            legendaY += 18;
-          }
-        });
-      }
-      
-      // Nome da peça no topo (apenas em modo normal)
-      if (peca.nome) {
-        ctx.font = 'bold 13px Arial';
+      // Nome da peça CENTRALIZADO NA PEÇA (não no topo)
+      if (peca.nome && !mini) {
+        ctx.font = 'bold 12px Arial';
         ctx.textAlign = 'center';
-        const nomeExibir = peca.nome.length > 25 ? peca.nome.substring(0, 25) + '...' : peca.nome;
+        const nomeExibir = peca.nome.length > 20 ? peca.nome.substring(0, 20) + '...' : peca.nome;
         
         // Fundo do nome
         const textWidth = ctx.measureText(nomeExibir).width;
-        ctx.fillStyle = 'rgba(59, 130, 246, 0.95)';
-        ctx.fillRect(canvasWidth/2 - textWidth/2 - 8, 4, textWidth + 16, 20);
+        ctx.fillStyle = 'rgba(59, 130, 246, 0.92)';
+        ctx.fillRect(offsetX + w/2 - textWidth/2 - 6, offsetY + h/2 - 9, textWidth + 12, 18);
         
         ctx.fillStyle = '#ffffff';
-        ctx.fillText(nomeExibir, canvasWidth/2, 17);
+        ctx.fillText(nomeExibir, offsetX + w/2, offsetY + h/2 + 3);
       }
     }
   };
@@ -3433,6 +3264,24 @@ const PreviewAcabamentos = ({ peca, mostrarSempre = false, mini = false }) => {
           <p className="text-xs text-gray-500 text-center mt-1">
             Use os botões abaixo para selecionar os lados de cada acabamento
           </p>
+        </div>
+      )}
+      {!mini && peca.acabamentos && Object.values(peca.acabamentos).some(a => a.ativo) && (
+        <div className="p-2 bg-white border-t border-gray-200">
+          <p className="text-xs font-semibold text-gray-600 mb-1">Acabamentos:</p>
+          <div className="flex flex-wrap gap-2">
+            {Object.keys(peca.acabamentos).map(tipo => {
+              const acab = peca.acabamentos[tipo];
+              if (!acab.ativo) return null;
+              const cores = { esquadria: '#ef4444', boleado: '#eab308', polimento: '#3b82f6', canal: '#f59e0b' };
+              return (
+                <div key={tipo} className="flex items-center gap-1">
+                  <div className="w-3 h-0.5" style={{ backgroundColor: cores[tipo] }}></div>
+                  <span className="text-xs text-gray-700">{tipo.charAt(0).toUpperCase() + tipo.slice(1)}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>
