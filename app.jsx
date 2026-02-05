@@ -405,6 +405,34 @@ const SistemaOrcamentoMarmore = () => {
 
   // Adicionar peça
   const adicionarPeca = (ambienteId, peca) => {
+    // Validar se a peça cabe na chapa do material selecionado
+    const material = materiais.find(m => m.id === peca.materialId);
+    if (!material) {
+      alert('❌ Material não encontrado!');
+      return;
+    }
+
+    const pecaComp = parseFloat(peca.comprimento);
+    const pecaAlt = parseFloat(peca.altura);
+    const chapaComp = material.comprimento;
+    const chapaAlt = material.altura;
+
+    // Verificar se cabe de alguma forma (normal ou rotacionada)
+    const cabeNormal = pecaComp <= chapaComp && pecaAlt <= chapaAlt;
+    const cabeRotacionada = pecaAlt <= chapaComp && pecaComp <= chapaAlt;
+
+    if (!cabeNormal && !cabeRotacionada) {
+      alert(`❌ Peça muito grande!\n\nPeça: ${pecaComp} x ${pecaAlt} mm\nChapa: ${chapaComp} x ${chapaAlt} mm\n\nA peça não cabe na chapa nem rotacionada.`);
+      return;
+    }
+
+    // Determinar rotação inicial: se não cabe normal mas cabe rotacionada, já inicia rotacionada
+    const rotacaoInicial = !cabeNormal && cabeRotacionada ? 90 : 0;
+
+    if (rotacaoInicial === 90) {
+      console.log('🔄 Peça será rotacionada automaticamente para caber na chapa');
+    }
+
     const novasPecas = [];
     for (let i = 0; i < (peca.quantidade || 1); i++) {
       novasPecas.push({
@@ -415,7 +443,7 @@ const SistemaOrcamentoMarmore = () => {
         chapaId: null,
         posX: 0,
         posY: 0,
-        rotacao: 0 // 0 = normal, 90 = girada 90 graus
+        rotacao: rotacaoInicial
       });
     }
 
@@ -701,15 +729,22 @@ const SistemaOrcamentoMarmore = () => {
     const larguraChapa = material.comprimento;
     const alturaChapa = material.altura;
     
+    // Considerar rotação da peça
+    const pecaLargura = peca.rotacao === 90 ? peca.altura : peca.comprimento;
+    const pecaAltura = peca.rotacao === 90 ? peca.comprimento : peca.altura;
+    
     // Tentar diferentes posições, começando do canto superior esquerdo
-    for (let y = espacamento; y + peca.altura + espacamento <= alturaChapa; y += 5) {
-      for (let x = espacamento; x + peca.comprimento + espacamento <= larguraChapa; x += 5) {
+    for (let y = espacamento; y + pecaAltura + espacamento <= alturaChapa; y += 5) {
+      for (let x = espacamento; x + pecaLargura + espacamento <= larguraChapa; x += 5) {
         // Verificar se não sobrepõe com outras peças (considerando espaçamento de 4mm)
         const sobrepoe = chapa.pecas.some(p => {
-          const distanciaX = Math.abs((x + peca.comprimento / 2) - (p.posX + p.comprimento / 2));
-          const distanciaY = Math.abs((y + peca.altura / 2) - (p.posY + p.altura / 2));
-          const somaLarguras = (peca.comprimento + p.comprimento) / 2 + espacamento;
-          const somaAlturas = (peca.altura + p.altura) / 2 + espacamento;
+          const pLargura = p.rotacao === 90 ? p.altura : p.comprimento;
+          const pAltura = p.rotacao === 90 ? p.comprimento : p.altura;
+          
+          const distanciaX = Math.abs((x + pecaLargura / 2) - (p.posX + pLargura / 2));
+          const distanciaY = Math.abs((y + pecaAltura / 2) - (p.posY + pAltura / 2));
+          const somaLarguras = (pecaLargura + pLargura) / 2 + espacamento;
+          const somaAlturas = (pecaAltura + pAltura) / 2 + espacamento;
           
           return distanciaX < somaLarguras && distanciaY < somaAlturas;
         });
