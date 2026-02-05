@@ -2758,7 +2758,6 @@ const AmbienteCard = ({ ambiente, materiais, onAdicionarPeca, onExcluirPeca, onV
                   <PreviewAcabamentos peca={novaPeca} />
                 </div>
               )}
-</div>
 
               <div className="flex gap-2">
                 <button
